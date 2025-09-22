@@ -1,0 +1,38 @@
+{
+  "name": "weather-forecast-app",
+  "version": "1.0.0",
+  "description": "A modern, responsive weather forecast application that provides current weather and 5-day forecasts for cities worldwide",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build step required'",
+    "start": "vercel dev",
+    "preview": "vercel --prod"
+  },
+  "keywords": [
+    "weather",
+    "forecast",
+    "vercel",
+    "javascript",
+    "python",
+    "openweathermap",
+    "responsive",
+    "pwa"
+  ],
+  "author": "Weather App Developer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/weather-forecast-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/weather-forecast-app/issues"
+  },
+  "homepage": "https://your-weather-app.vercel.app",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}
