@@ -1,12 +1,6 @@
 {
   "version": 2,
   "name": "weather-forecast-app",
-  "functions": {
-    "api/weather.py": {
-      "runtime": "@vercel/python",
-      "maxDuration": 10
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
