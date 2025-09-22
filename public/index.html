@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast App - Get Current Weather & 5-Day Forecasts</title>
+    <meta name="description" content="Get current weather and 5-day forecasts for any city worldwide. Beautiful, fast, and accurate weather information.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-cloud-sun"></i> Weather Forecast App</h1>
+            <p>Get current weather and 5-day forecasts for any city worldwide</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="cityInput" placeholder="Enter city name (e.g., London, New York, Tokyo)..." 
+                       autocomplete="off" maxlength="50">
+                <button id="searchBtn" aria-label="Search weather">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <div class="button-group">
+                <button id="currentWeatherBtn" class="weather-btn active" aria-label="Get current weather">
+                    <i class="fas fa-thermometer-half"></i> Current Weather
+                </button>
+                <button id="forecastBtn" class="weather-btn" aria-label="Get 5-day forecast">
+                    <i class="fas fa-calendar-alt"></i> 5-Day Forecast
+                </button>
+            </div>
+        </div>
+
+        <div id="loadingSpinner" class="loading" style="display: none;" role="status" aria-live="polite">
+            <i class="fas fa-spinner fa-spin"></i> 
+            <span>Loading weather data...</span>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;" role="alert" aria-live="assertive"></div>
+
+        <div id="weatherResult" class="weather-result" style="display: none;" role="main">
+            <!-- Weather data will be inserted here -->
+        </div>
+
+        <div class="recent-searches" id="recentSearches" style="display: none;">
+            <h3><i class="fas fa-history"></i> Recent Searches</h3>
+            <div class="recent-cities" id="recentCities">
+                <!-- Recent cities will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Weather Forecast App. Powered by <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeatherMap API</a>.</p>
+            <div class="footer-links">
+                <span>Made with ❤️ for everyone</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+
+    <!-- PWA Support -->
+    <script>
+        // Register service worker for offline support (optional future enhancement)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Service worker registration can be added here for PWA functionality
+            });
+        }
+    </script>
+</body>
+</html>
