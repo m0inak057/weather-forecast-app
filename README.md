@@ -48,17 +48,46 @@ git clone https://github.com/yourusername/weather-forecast-app.git
 cd weather-forecast-app
 ```
 
-### 2. Install Dependencies
+### 2. Set Up Environment Variables
+
+1. **Get an OpenWeather API Key**:
+   - Go to [OpenWeatherMap](https://openweathermap.org/api)
+   - Sign up for a free account
+   - Generate an API key from your dashboard
+
+2. **Create Environment File**:
+   ```bash
+   cp .env.example .env
+   ```
+   
+3. **Add Your API Key**:
+   Edit the `.env` file and replace `your_api_key_here` with your actual API key:
+   ```
+   OPENWEATHER_API_KEY=your_actual_api_key_here
+   ```
+
+### 3. Install Dependencies
 
 ```bash
-# Install Vercel CLI globally
+# Install Vercel CLI globally (optional, for deployment)
 npm install -g vercel
 
-# Install Python dependencies (for local testing)
+# Install Python dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Environment Setup
+### 4. Run Locally
+
+**Option 1: Using the Development Server (Recommended)**
+```bash
+python dev_server.py
+```
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+**Option 2: Using Vercel Dev**
+```bash
+vercel dev
+```
 
 1. Copy the environment file:
    ```bash
