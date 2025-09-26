@@ -52,7 +52,15 @@ def handler(request):
             data = get_weather_forecast(city, api_key)
         else:
             data = get_current_weather(city, api_key)
-        
+
+        # If helper returned an error dict, propagate its status and message
+        if isinstance(data, dict) and 'error' in data:
+            return {
+                'statusCode': int(data.get('status', 500)),
+                'headers': headers,
+                'body': json.dumps({'error': data['error']})
+            }
+
         if data:
             return {
                 'statusCode': 200,
@@ -75,18 +83,22 @@ def handler(request):
 
 def get_current_weather(city_name, api_key):
     """Get current weather data for a city."""
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
-    complete_url = f"{base_url}q={city_name}&appid={api_key}&units=metric"
-    
+    base_url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {
+        'q': city_name,
+        'appid': api_key,
+        'units': 'metric',
+    }
+
     try:
-        response = requests.get(complete_url, timeout=10)
-        
+        response = requests.get(base_url, params=params, timeout=10)
+
         if response.status_code == 200:
             data = response.json()
             main = data['main']
             weather = data['weather'][0]
             sys = data['sys']
-            
+
             return {
                 'type': 'current',
                 'city': data['name'],
@@ -100,32 +112,62 @@ def get_current_weather(city_name, api_key):
                 'wind_speed': data.get('wind', {}).get('speed', 0),
                 'visibility': data.get('visibility', 0) / 1000  # Convert to km
             }
+        else:
+            # Try to extract a helpful message from OpenWeather response
+            try:
+                err = response.json()
+                message = err.get('message') or 'Upstream service error'
+            except Exception:
+                message = 'Upstream service error'
+
+            # Map common upstream errors to meaningful HTTP statuses
+            status = response.status_code
+            if status == 401:
+                message = 'Invalid or missing API key'
+            elif status == 404:
+                message = 'City not found'
+            elif status == 429:
+                message = 'Rate limit exceeded. Please try again later.'
+
+            return {
+                'error': message,
+                'status': status
+            }
     except requests.RequestException as e:
-        print(f"Request error: {e}")
+        # Network/timeout errors
+        return {
+            'error': f'Network error contacting weather service: {str(e)}',
+            'status': 502
+        }
     except KeyError as e:
-        print(f"Data parsing error: {e}")
-    
-    return None
+        return {
+            'error': f'Data parsing error: {str(e)}',
+            'status': 502
+        }
 
 def get_weather_forecast(city_name, api_key):
     """Get 5-day weather forecast for a city."""
-    base_url = "http://api.openweathermap.org/data/2.5/forecast?"
-    complete_url = f"{base_url}q={city_name}&appid={api_key}&units=metric"
-    
+    base_url = "https://api.openweathermap.org/data/2.5/forecast"
+    params = {
+        'q': city_name,
+        'appid': api_key,
+        'units': 'metric',
+    }
+
     try:
-        response = requests.get(complete_url, timeout=10)
-        
+        response = requests.get(base_url, params=params, timeout=10)
+
         if response.status_code == 200:
             data = response.json()
             city = data['city']
-            
+
             forecasts = []
-            # Get forecast for next 5 days (every 24 hours)
+            # Get forecast for next 5 days (every ~24 hours => every 8th item at 3-hour intervals)
             for i in range(0, min(40, len(data['list'])), 8):
                 forecast = data['list'][i]
                 main = forecast['main']
                 weather = forecast['weather'][0]
-                
+
                 forecasts.append({
                     'date': forecast['dt_txt'].split(' ')[0],
                     'temperature': main['temp'],
@@ -136,16 +178,40 @@ def get_weather_forecast(city_name, api_key):
                     'icon': weather['icon'],
                     'wind_speed': forecast.get('wind', {}).get('speed', 0)
                 })
-            
+
             return {
                 'type': 'forecast',
                 'city': city['name'],
                 'country': city['country'],
                 'forecasts': forecasts
             }
+        else:
+            # Try to extract a helpful message from OpenWeather response
+            try:
+                err = response.json()
+                message = err.get('message') or 'Upstream service error'
+            except Exception:
+                message = 'Upstream service error'
+
+            status = response.status_code
+            if status == 401:
+                message = 'Invalid or missing API key'
+            elif status == 404:
+                message = 'City not found'
+            elif status == 429:
+                message = 'Rate limit exceeded. Please try again later.'
+
+            return {
+                'error': message,
+                'status': status
+            }
     except requests.RequestException as e:
-        print(f"Request error: {e}")
+        return {
+            'error': f'Network error contacting weather service: {str(e)}',
+            'status': 502
+        }
     except KeyError as e:
-        print(f"Data parsing error: {e}")
-    
-    return None
+        return {
+            'error': f'Data parsing error: {str(e)}',
+            'status': 502
+        }

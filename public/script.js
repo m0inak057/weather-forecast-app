@@ -95,30 +95,43 @@ class WeatherApp {
         
         try {
             const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}&type=${this.currentWeatherType}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                // Fallback when non-JSON response
+                data = null;
             }
-            
-            const data = await response.json();
-            
-            if (data.error) {
+
+            if (!response.ok) {
+                const serverMsg = data && (data.error || data.message);
+                throw new Error(serverMsg ? `HTTP ${response.status}: ${serverMsg}` : `HTTP ${response.status}`);
+            }
+
+            if (data && data.error) {
                 this.showError(data.error);
-            } else {
+            } else if (data) {
                 this.displayWeather(data);
                 this.addToRecentCities(city);
+            } else {
+                throw new Error('Invalid server response');
             }
         } catch (error) {
             console.error('Weather fetch error:', error);
             
             if (error.message.includes('Failed to fetch')) {
                 this.showError('Network error. Please check your internet connection and try again.');
+            } else if (error.message.includes('Invalid or missing API key')) {
+                this.showError('Server is missing or has an invalid OpenWeather API key. Please configure OPENWEATHER_API_KEY.');
             } else if (error.message.includes('HTTP 404')) {
                 this.showError(`City "${city}" not found. Please check the spelling and try again.`);
             } else if (error.message.includes('HTTP 429')) {
                 this.showError('Too many requests. Please wait a moment and try again.');
             } else if (error.message.includes('HTTP 500')) {
                 this.showError('Server error. Please try again later.');
+            } else if (error.message.includes('502')) {
+                this.showError('Weather service is unavailable. Please try again shortly.');
             } else {
                 this.showError('Something went wrong. Please try again.');
             }
